@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
@@ -14,6 +14,11 @@ import { SettingsView } from '@/components/views/SettingsView';
 
 export function MainLayout() {
   const { state } = useAppState();
+  
+  // Enable dark mode on mount
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
   
   const renderCurrentView = () => {
     switch (state.currentView) {
