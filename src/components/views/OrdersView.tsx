@@ -193,7 +193,18 @@ export function OrdersView() {
                 <CheckCircle2 className="w-4 h-4" />
                 Mark as Paid
               </Button>
-              <Button variant="destructive" size="sm" className="gap-2">
+              <Button variant="destructive" size="sm" className="gap-2" onClick={() => {
+                if (selectedOrders.length === 0) return;
+                if (!confirm(`Delete ${selectedOrders.length} selected orders?`)) return;
+                
+                // Delete in reverse order to maintain indices
+                const sorted = [...selectedOrders].sort((a, b) => b - a);
+                sorted.forEach(index => {
+                  dispatch({ type: 'DELETE_ORDER', payload: index });
+                });
+                
+                setSelectedOrders([]);
+              }}>
                 <Trash2 className="w-4 h-4" />
                 Delete Selected
               </Button>

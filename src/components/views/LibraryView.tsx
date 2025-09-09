@@ -286,9 +286,18 @@ export function LibraryView() {
                     </p>
                   </div>
                   
-                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => {
+                            if (confirm('Delete this media file?')) {
+                              dispatch({ type: 'DELETE_MEDIA', payload: media.id });
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                 </div>
               ))}
             </div>

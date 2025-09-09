@@ -33,6 +33,9 @@ export function SettingsView() {
     
     dispatch({ type: 'UPDATE_SETTINGS', payload: formData });
     setIsSaving(false);
+    
+    // Show success message with toast or simple alert
+    alert('Settings saved successfully!');
   };
   
   const handleInputChange = (field: keyof typeof formData, value: string) => {

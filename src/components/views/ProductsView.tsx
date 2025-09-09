@@ -39,10 +39,92 @@ export function ProductsView() {
     dispatch({ type: 'ADD_PRODUCT', payload: newProduct });
   };
   
+  const handleEditProduct = (index: number) => {
+    const product = state.products[index];
+    const name = prompt('Product name?', product.name) || product.name;
+    const price = parseInt(prompt('Price?', product.price.toString()) || product.price.toString(), 10);
+    const sku = prompt('SKU?', product.sku) || product.sku;
+    const category = prompt('Category?', product.category) || product.category;
+    const stock = parseInt(prompt('Stock?', product.stock.toString()) || product.stock.toString(), 10);
+    
+    const updatedProduct = {
+      ...product,
+      name,
+      price,
+      sku,
+      category,
+      stock
+    };
+    
+    dispatch({ type: 'UPDATE_PRODUCT', payload: { index, product: updatedProduct } });
+  };
+  
+  const handleImageUpload = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const updatedProduct = {
+        ...state.products[index],
+        image: e.target?.result as string
+      };
+      
+      dispatch({ type: 'UPDATE_PRODUCT', payload: { index, product: updatedProduct } });
+    };
+    reader.readAsDataURL(file);
+  };
+  
   const handleDeleteProduct = (index: number) => {
     if (confirm('Delete this product?')) {
       dispatch({ type: 'DELETE_PRODUCT', payload: index });
     }
+  };
+  
+  const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        alert('CSV file must have at least a header and one data row.');
+        return;
+      }
+      
+      // Skip header line
+      const dataLines = lines.slice(1);
+      
+      dataLines.forEach((line, index) => {
+        const [name, price, sku, category, stock] = line.split(',').map(field => 
+          field.replace(/^"|"$/g, '').trim()
+        );
+        
+        if (name && price) {
+          const newProduct = {
+            id: 'imported_' + Date.now() + '_' + index,
+            name,
+            price: parseInt(price) || 0,
+            sku: sku || '',
+            category: category || 'Imported',
+            image: '',
+            stock: parseInt(stock) || 0
+          };
+          
+          dispatch({ type: 'ADD_PRODUCT', payload: newProduct });
+        }
+      });
+      
+      alert(`Imported ${dataLines.length} products successfully!`);
+    };
+    
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
   };
   
   const handleBulkDelete = () => {
@@ -92,11 +174,34 @@ export function ProductsView() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <Upload className="w-4 h-4" />
-            Import CSV
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <label>
+            <Button variant="outline" size="sm" className="gap-2" asChild>
+              <span>
+                <Upload className="w-4 h-4" />
+                Import CSV
+              </span>
+            </Button>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleImportCSV}
+              className="hidden"
+            />
+          </label>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+              encodeURIComponent([
+                "Name,Price,SKU,Category,Stock",
+                ...state.products.map(p => `${p.name},${p.price},${p.sku},${p.category},${p.stock}`)
+              ].join('\n'));
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', csvContent);
+            link.setAttribute('download', 'products.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}>
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
@@ -199,9 +304,25 @@ export function ProductsView() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleEditProduct(index)}
+                        >
                           <Edit className="w-3 h-3" />
                         </Button>
+                        <label>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                            <span>📷</span>
+                          </Button>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(index, e)}
+                            className="hidden"
+                          />
+                        </label>
                         <Button 
                           variant="ghost" 
                           size="icon" 

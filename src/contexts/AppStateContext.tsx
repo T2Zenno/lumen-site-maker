@@ -98,6 +98,7 @@ type AppAction =
   | { type: 'DELETE_PRODUCT'; payload: number }
   | { type: 'ADD_ORDER'; payload: Order }
   | { type: 'UPDATE_ORDER'; payload: { index: number; order: Order } }
+  | { type: 'DELETE_ORDER'; payload: number }
   | { type: 'ADD_CUSTOMER'; payload: Customer }
   | { type: 'ADD_MEDIA'; payload: Media }
   | { type: 'DELETE_MEDIA'; payload: string }
@@ -206,6 +207,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         orders: state.orders.map((order, index) =>
           index === action.payload.index ? action.payload.order : order
         )
+      };
+    
+    case 'DELETE_ORDER':
+      return {
+        ...state,
+        orders: state.orders.filter((_, index) => index !== action.payload)
       };
     
     case 'ADD_CUSTOMER':
