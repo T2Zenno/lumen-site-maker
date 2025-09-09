@@ -2,95 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Micro SaaS Page Builder Design System - Dark Theme with Blue Accents */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark theme colors - primary palette */
+    --background: 225 25% 8%;          /* #0b1126 - deep navy background */
+    --foreground: 225 50% 95%;         /* #e8ecff - light text */
+    
+    /* Surface colors */
+    --card: 225 30% 12%;               /* #12173a - card background */
+    --card-foreground: 225 50% 95%;   /* #e8ecff */
+    
+    --surface: 225 35% 15%;            /* #1a2047 - elevated surface */
+    --surface-foreground: 225 45% 90%; /* #dfe3fa */
+    
+    /* Blue accent system */
+    --primary: 227 78% 65%;            /* #6366f1 - vibrant blue primary */
+    --primary-hover: 227 75% 70%;      /* #7c7ff5 - lighter hover */
+    --primary-foreground: 0 0% 100%;   /* white text on primary */
+    
+    --accent: 225 70% 58%;             /* #4f46e5 - deeper blue accent */
+    --accent-hover: 225 75% 63%;       /* #6366f1 - hover state */
+    --accent-foreground: 0 0% 100%;
+    
+    /* Secondary colors */
+    --secondary: 225 25% 18%;          /* #243056 - muted surface */
+    --secondary-foreground: 225 40% 85%; /* #cbd5ff */
+    
+    --muted: 225 20% 22%;              /* #2a315a - subtle background */
+    --muted-foreground: 225 30% 70%;   /* #9ca3d4 */
+    
+    /* Status colors */
+    --success: 142 76% 36%;            /* #059669 - green success */
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;             /* #f59e0b - amber warning */
+    --warning-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;          /* #ef4444 - red destructive */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Border and input */
+    --border: 225 25% 25%;             /* #323856 - subtle borders */
+    --input: 225 30% 16%;              /* #1e2442 - input background */
+    --input-border: 225 25% 30%;       /* #3d4463 - input border */
+    --ring: 227 78% 65%;               /* focus ring matches primary */
+    
+    /* Workspace specific */
+    --workspace: 225 20% 14%;          /* #1a1f35 - workspace background */
+    --canvas: 225 15% 10%;             /* #141828 - canvas area */
+    --palette: 225 30% 18%;            /* #1f2442 - palette background */
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(227 78% 65%), hsl(225 70% 58%));
+    --gradient-surface: linear-gradient(180deg, hsl(225 30% 12%), hsl(225 25% 10%));
+    --gradient-accent: linear-gradient(135deg, hsl(225 70% 58%), hsl(227 78% 65%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(225 25% 8% / 0.3);
+    --shadow-md: 0 4px 12px hsl(225 25% 8% / 0.4);
+    --shadow-lg: 0 8px 25px hsl(225 25% 8% / 0.5);
+    --shadow-glow: 0 0 20px hsl(227 78% 65% / 0.3);
+    
+    /* Spacing and sizing */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+    
+    /* Animations */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -98,8 +80,90 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
+  
+  html {
+    @apply dark; /* Force dark mode */
+  }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}
+
+@layer components {
+  /* Builder specific styles */
+  .builder-canvas {
+    @apply bg-canvas border border-border rounded-lg min-h-[600px] relative overflow-auto;
+    background-image: 
+      radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  .drag-zone {
+    @apply border-2 border-dashed border-primary/30 rounded-lg p-8 text-center transition-colors;
+  }
+  
+  .drag-zone.drag-over {
+    @apply border-primary bg-primary/10;
+  }
+  
+  .block-element {
+    @apply border border-transparent hover:border-primary/50 transition-all cursor-pointer relative;
+    min-height: 40px;
+  }
+  
+  .block-element.selected {
+    @apply border-primary shadow-glow;
+  }
+  
+  .block-actions {
+    @apply absolute -top-2 -right-2 flex gap-1 opacity-0 transition-opacity;
+  }
+  
+  .block-element:hover .block-actions,
+  .block-element.selected .block-actions {
+    @apply opacity-100;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-pending {
+    @apply bg-warning/20 text-warning;
+  }
+  
+  .status-paid {
+    @apply bg-success/20 text-success;
+  }
+  
+  .status-canceled {
+    @apply bg-destructive/20 text-destructive;
+  }
+  
+  /* Notification badges */
+  .notification-badge {
+    @apply absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full;
+  }
+  
+  /* Custom button variants will be defined in button component */
 }
