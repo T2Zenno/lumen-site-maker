@@ -57,8 +57,8 @@ export function TopBar() {
 
   const buildStandaloneHTML = (title: string) => {
     const brand = state.settings.brandName || 'Brand Anda';
-    const currentPageElement = document.getElementById('pageRoot');
-    const inner = currentPageElement?.innerHTML || '';
+    const currentPage = state.pages.find(p => p.id === state.currentPageId);
+    const inner = currentPage?.html || '';
     const faviconHref = state.media.find(m => m.id === state.settings.favicon)?.dataUrl || '';
     const theme = state.settings.theme || 'dark';
     const lang = state.settings.lang || 'id';
@@ -81,6 +81,15 @@ export function TopBar() {
   };
 
   const handlePreview = () => {
+    const currentPage = state.pages.find(p => p.id === state.currentPageId);
+    console.log('Preview - Current page:', currentPage);
+    console.log('Preview - Current page HTML:', currentPage?.html);
+    
+    if (!currentPage || !currentPage.html) {
+      alert('No content to preview. Please add some blocks to your page first.');
+      return;
+    }
+    
     const html = buildStandaloneHTML(state.settings.brandName || 'Landing');
     const w = window.open();
     if (w) {
@@ -90,6 +99,14 @@ export function TopBar() {
   };
   
   const handleExportHTML = () => {
+    const currentPage = state.pages.find(p => p.id === state.currentPageId);
+    console.log('Export - Current page:', currentPage);
+    
+    if (!currentPage || !currentPage.html) {
+      alert('No content to export. Please add some blocks to your page first.');
+      return;
+    }
+    
     const html = buildStandaloneHTML(state.settings.brandName || 'Landing');
     downloadFile('halaman.html', html);
   };
