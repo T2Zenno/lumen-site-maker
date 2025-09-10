@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ConfirmationDialog, InputDialog } from '@/components/ui/confirmation-dialog';
 import { 
   Save, 
   Upload, 
@@ -19,11 +20,18 @@ import {
   Image
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 
 export function SettingsView() {
   const { state, dispatch } = useAppState();
+  const { toast } = useToast();
   const [formData, setFormData] = useState(state.settings);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Dialog states
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showDemoDialog, setShowDemoDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   
   const handleSave = async () => {
     setIsSaving(true);
@@ -34,8 +42,10 @@ export function SettingsView() {
     dispatch({ type: 'UPDATE_SETTINGS', payload: formData });
     setIsSaving(false);
     
-    // Show success message with toast or simple alert
-    alert('Settings saved successfully!');
+    toast({
+      title: "Settings saved",
+      description: "Your settings have been saved successfully.",
+    });
   };
   
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -63,17 +73,26 @@ export function SettingsView() {
       try {
         const importedData = JSON.parse(e.target?.result as string);
         dispatch({ type: 'LOAD_STATE', payload: importedData });
-        alert('Data imported successfully!');
+        toast({
+          title: "Data imported",
+          description: "Your data has been imported successfully.",
+        });
       } catch (error) {
-        alert('Failed to import data. Please check the file format.');
+        toast({
+          title: "Import failed", 
+          description: "Failed to import data. Please check the file format.",
+          variant: "destructive"
+        });
       }
     };
     reader.readAsText(file);
   };
   
   const handleSeedDemo = () => {
-    if (!confirm('Add demo data? This will add sample products, orders, and customers.')) return;
-    
+    setShowDemoDialog(true);
+  };
+  
+  const confirmSeedDemo = () => {
     // Add demo products
     const demoProducts = [
       { id: 'demo_1', name: 'Premium T-Shirt', price: 150000, sku: 'SHIRT-001', category: 'Fashion', image: '', stock: 25 },
@@ -105,15 +124,23 @@ export function SettingsView() {
       dispatch({ type: 'ADD_CUSTOMER', payload: customer });
     });
     
-    alert('Demo data added successfully!');
+    toast({
+      title: "Demo data added",
+      description: "Sample products, orders, and customers have been added to your workspace.",
+    });
   };
   
   const handleReset = () => {
-    if (!confirm('Reset all data? This action cannot be undone.')) return;
-    
+    setShowResetDialog(true);
+  };
+  
+  const confirmReset = () => {
     dispatch({ type: 'RESET_STATE' });
     setFormData(state.settings);
-    alert('Workspace reset successfully!');
+    toast({
+      title: "Workspace reset",
+      description: "Your workspace has been reset successfully.",
+    });
   };
   
   return (
@@ -382,7 +409,7 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Populate your workspace with sample products, orders, and customers to test features.
                 </p>
-                <Button onClick={handleSeedDemo} variant="outline" className="gap-2">
+                <Button onClick={confirmSeedDemo} variant="outline" className="gap-2">
                   <Database className="w-4 h-4" />
                   Add Demo Data
                 </Button>
@@ -399,7 +426,7 @@ export function SettingsView() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Reset your workspace to start fresh. This will permanently delete all data.
                 </p>
-                <Button onClick={handleReset} variant="destructive" className="gap-2">
+                <Button onClick={confirmReset} variant="destructive" className="gap-2">
                   <RefreshCw className="w-4 h-4" />
                   Reset Workspace
                 </Button>
@@ -421,7 +448,7 @@ export function SettingsView() {
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select logo from library" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-50 bg-popover border border-border shadow-lg">
                     <SelectItem value="">No logo</SelectItem>
                     {state.media.map((media) => (
                       <SelectItem key={media.id} value={media.id}>
@@ -438,7 +465,7 @@ export function SettingsView() {
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select favicon from library" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-50 bg-popover border border-border shadow-lg">
                     <SelectItem value="">No favicon</SelectItem>
                     {state.media.map((media) => (
                       <SelectItem key={media.id} value={media.id}>
@@ -480,6 +507,28 @@ export function SettingsView() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Dialogs */}
+      <ConfirmationDialog
+        open={showResetDialog}
+        onOpenChange={setShowResetDialog}
+        title="Reset Workspace"
+        description="This will permanently delete all your data including pages, products, orders, and customers. This action cannot be undone."
+        confirmText="Reset"
+        cancelText="Cancel"
+        onConfirm={confirmReset}
+        variant="destructive"
+      />
+      
+      <ConfirmationDialog
+        open={showDemoDialog}
+        onOpenChange={setShowDemoDialog}
+        title="Add Demo Data"
+        description="This will add sample products, orders, and customers to your workspace for testing purposes."
+        confirmText="Add Demo Data"
+        cancelText="Cancel"
+        onConfirm={confirmSeedDemo}
+      />
     </div>
   );
 }

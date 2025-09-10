@@ -68,6 +68,7 @@ export interface AppState {
   pages: Page[];
   currentPageId: string;
   selectedElement: HTMLElement | null;
+  previewMode: 'desktop' | 'tablet' | 'mobile';
   products: Product[];
   orders: Order[];
   customers: Customer[];
@@ -90,6 +91,7 @@ type AppAction =
   | { type: 'SET_CURRENT_VIEW'; payload: string }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_CURRENT_PAGE'; payload: string }
+  | { type: 'SET_PREVIEW_MODE'; payload: 'desktop' | 'tablet' | 'mobile' }
   | { type: 'ADD_PAGE'; payload: { id: string; name: string } }
   | { type: 'UPDATE_PAGE_HTML'; payload: { id: string; html: string } }
   | { type: 'SELECT_ELEMENT'; payload: HTMLElement | null }
@@ -114,6 +116,7 @@ const defaultState = (): AppState => ({
   pages: [{ id: 'home', name: 'Beranda', html: '' }],
   currentPageId: 'home',
   selectedElement: null,
+  previewMode: 'desktop',
   products: [],
   orders: [],
   customers: [],
@@ -155,6 +158,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
     
     case 'SET_CURRENT_PAGE':
       return { ...state, currentPageId: action.payload };
+    
+    case 'SET_PREVIEW_MODE':
+      return { ...state, previewMode: action.payload };
     
     case 'ADD_PAGE':
       return {

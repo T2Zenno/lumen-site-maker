@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { BlockPalette } from '@/components/builder/BlockPalette';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
-import { Inspector } from '@/components/builder/Inspector';
+import { FunctionalInspector } from '@/components/builder/FunctionalInspector';
 
 export function BuilderView() {
   const { state } = useAppState();
-  const [draggedBlock, setDraggedBlock] = useState<string | null>(null);
   
   return (
     <div className="flex-1 flex h-full overflow-hidden">
@@ -18,12 +17,12 @@ export function BuilderView() {
             Drag blocks to build your page
           </p>
         </div>
-        <BlockPalette onDragStart={setDraggedBlock} />
+        <BlockPalette onDragStart={() => {}} />
       </div>
       
       {/* Center Panel - Canvas */}
-      <div className="flex-1 bg-workspace p-6 overflow-auto">
-        <BuilderCanvas draggedBlock={draggedBlock} />
+      <div className="flex-1 bg-workspace p-6 overflow-hidden">
+        <BuilderCanvas draggedBlock={null} />
       </div>
       
       {/* Right Panel - Inspector */}
@@ -34,7 +33,7 @@ export function BuilderView() {
             {state.selectedElement ? 'Edit selected element' : 'Select an element to edit'}
           </p>
         </div>
-        <Inspector />
+        <FunctionalInspector />
       </div>
     </div>
   );

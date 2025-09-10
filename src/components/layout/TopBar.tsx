@@ -62,13 +62,148 @@ export function TopBar() {
     const faviconHref = state.media.find(m => m.id === state.settings.favicon)?.dataUrl || '';
     const theme = state.settings.theme || 'dark';
     const lang = state.settings.lang || 'id';
+    
+    // Get the full Tailwind CSS for proper styling
+    const tailwindCSS = `
+      @tailwind base;
+      @tailwind components;
+      @tailwind utilities;
+      
+      /* Dark theme variables */
+      :root {
+        --background: 225 25% 8%;
+        --foreground: 225 50% 95%;
+        --card: 225 30% 12%;
+        --card-foreground: 225 50% 95%;
+        --primary: 227 78% 65%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 225 25% 18%;
+        --secondary-foreground: 225 40% 85%;
+        --muted: 225 20% 22%;
+        --muted-foreground: 225 30% 70%;
+        --accent: 225 70% 58%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 225 25% 25%;
+        --input: 225 30% 16%;
+        --ring: 227 78% 65%;
+        --radius: 0.75rem;
+      }
+      
+      * { box-sizing: border-box; }
+      body { 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        margin: 0;
+        padding: 0;
+      }
+      
+      /* Tailwind utility classes */
+      .bg-primary { background-color: hsl(var(--primary)); }
+      .text-primary { color: hsl(var(--primary)); }
+      .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+      .bg-card { background-color: hsl(var(--card)); }
+      .text-card-foreground { color: hsl(var(--card-foreground)); }
+      .bg-secondary { background-color: hsl(var(--secondary)); }
+      .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
+      .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+      .border { border: 1px solid hsl(var(--border)); }
+      .rounded-lg { border-radius: calc(var(--radius) - 2px); }
+      .rounded-md { border-radius: calc(var(--radius) - 4px); }
+      .p-4 { padding: 1rem; }
+      .p-6 { padding: 1.5rem; }
+      .p-8 { padding: 2rem; }
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+      .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+      .m-4 { margin: 1rem; }
+      .mx-auto { margin-left: auto; margin-right: auto; }
+      .text-center { text-align: center; }
+      .text-left { text-align: left; }
+      .text-right { text-align: right; }
+      .font-bold { font-weight: 700; }
+      .font-semibold { font-weight: 600; }
+      .text-sm { font-size: 0.875rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .text-2xl { font-size: 1.5rem; }
+      .text-3xl { font-size: 1.875rem; }
+      .text-4xl { font-size: 2.25rem; }
+      .flex { display: flex; }
+      .items-center { align-items: center; }
+      .justify-center { justify-content: center; }
+      .justify-between { justify-content: space-between; }
+      .space-y-4 > * + * { margin-top: 1rem; }
+      .space-y-2 > * + * { margin-top: 0.5rem; }
+      .gap-4 { gap: 1rem; }
+      .gap-2 { gap: 0.5rem; }
+      .w-full { width: 100%; }
+      .h-full { height: 100%; }
+      .max-w-6xl { max-width: 72rem; }
+      .max-w-4xl { max-width: 56rem; }
+      .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+      .grid { display: grid; }
+      .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: calc(var(--radius) - 4px);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+      }
+      .btn-primary {
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+      }
+      .btn-primary:hover {
+        background-color: hsl(var(--primary) / 0.9);
+      }
+      .btn-secondary {
+        background-color: hsl(var(--secondary));
+        color: hsl(var(--secondary-foreground));
+      }
+      
+      @media (max-width: 768px) {
+        .container { padding: 0 0.5rem; }
+        .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .text-4xl { font-size: 1.875rem; }
+        .text-3xl { font-size: 1.5rem; }
+        .p-8 { padding: 1rem; }
+        .p-6 { padding: 1rem; }
+      }
+    `;
     const wa = state.settings.waNumber || '';
     const waTpl = state.settings.waTemplate || '';
     const bank = state.settings.bankInfo || '';
     const qrisImg = state.media.find(m => m.id === state.settings.qrisImg)?.dataUrl || '';
     const qrisId = state.settings.qrisId || '';
 
-    return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>${title || brand}</title>${faviconHref ? `<link rel="icon" href="${faviconHref}">` : ''}<style>body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:${theme === 'light' ? '#f5f7ff' : '#0b1126'};color:${theme === 'light' ? '#0f1220' : '#e8ecff'}} .blk{border-radius:16px;border:1px solid ${theme === 'light' ? '#d8def7' : '#243056'};background:${theme === 'light' ? '#ffffff' : '#12173a'};padding:24px;max-width:980px;margin:14px auto} .btn{display:inline-block;padding:10px 14px;border-radius:12px;background:${theme === 'light' ? '#eef2ff' : '#1e2442'};border:1px solid ${theme === 'light' ? '#d8def7' : '#2a315a'};color:inherit;text-decoration:none} .btn.acc{background:${theme === 'light' ? '#6366f1' : '#6366f1'};border-color:#6d6de5;color:white} input{padding:10px;border-radius:10px;border:1px solid ${theme === 'light' ? '#d8def7' : '#2a315a'};background:${theme === 'light' ? '#fff' : '#0f1329'};color:inherit} .muted{opacity:.8}</style></head><body>${inner}<script>(function(){const currency=n=> new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n||0);function waCheckout(blk){var price=parseInt((blk.querySelector('[data-role="price"]')||{}).innerText||'0',10);var title=(blk.querySelector('h3,h2,h1')||{}).innerText||'Produk';var qty=parseInt((blk.querySelector('[data-role="qty"]')||{}).value||'1',10);var num='${wa}'.replace(/\\D/g,''); if(!num){alert('Nomor WhatsApp belum diatur.'); return;} var total=price*qty; var msg='${waTpl}'.replace('{{product}}',title).replace('{{qty}}',qty).replace('{{total}}',currency(total)); var url='https://wa.me/'+num+'?text='+encodeURIComponent(msg); window.open(url,'_blank');} function openTransfer(blk){var price=parseInt((blk.querySelector('[data-role="price"]')||{}).innerText||'0',10);var qty=parseInt((blk.querySelector('[data-role="qty"]')||{}).value||'1',10);var title=(blk.querySelector('h3,h2,h1')||{}).innerText||'Produk';var total=price*qty; var info='${bank}'.trim()||'Info bank belum diatur.'; alert('Transfer '+currency(total)+'\\n\\n'+title+'\\n\\n'+info);} function openQris(){var modal=document.getElementById('qrisModal'); if(!modal){modal=document.createElement('div'); modal.id='qrisModal'; modal.style='position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:99'; modal.innerHTML='<div style="background:${theme === 'light' ? '#fff' : '#0f1329'};padding:18px;border-radius:14px;min-width:280px;text-align:center"><h3>Bayar via QRIS</h3><div id="_qrisWrap"></div><div style="margin:8px 0;opacity:.8">Merchant: ${qrisId || '-'}</div><button onclick="this.closest(\\'div#qrisModal\\').remove()" style="padding:9px 12px;border-radius:12px;border:1px solid ${theme === 'light' ? '#d8def7' : '#2a315a'}">Tutup</button></div>'; document.body.appendChild(modal);} var wrap=modal.querySelector('#_qrisWrap'); wrap.innerHTML=${qrisImg ? "'" + `<img alt=QRIS style="width:260px;height:260px;object-fit:contain;border-radius:12px;border:1px solid ${theme === 'light' ? '#d8def7' : '#2a315a'}" src="${qrisImg}">` + "'" : "'QRIS belum diatur'"}; } function contactWA(blk){var inputs=blk.querySelectorAll('input'); var name=inputs[0]?.value||''; var phone=inputs[1]?.value||''; var msg=inputs[2]?.value||''; var num='${wa}'.replace(/\\D/g,''); if(!num){alert('Nomor WhatsApp belum diatur.'); return;} var full=encodeURIComponent('Nama: '+name+'%0ANomor: '+phone+'%0APesan: '+msg); window.open('https://wa.me/'+num+'?text='+full,'_blank'); } document.querySelectorAll('[data-action="buy-wa"]').forEach(b=> b.addEventListener('click', e=>{ e.preventDefault(); waCheckout(b.closest('.blk')); })); document.querySelectorAll('[data-action="buy-transfer"]').forEach(b=> b.addEventListener('click', e=>{ e.preventDefault(); openTransfer(b.closest('.blk')); })); document.querySelectorAll('[data-action="buy-qris"]').forEach(b=> b.addEventListener('click', e=>{ e.preventDefault(); openQris(); })); document.querySelectorAll('[data-action="contact-wa"]').forEach(b=> b.addEventListener('click', e=>{ e.preventDefault(); contactWA(b.closest('.blk')); })); })();<\\/script></body></html>`;
+    return `<!DOCTYPE html>
+<html lang="${lang}" class="${theme}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} - ${brand}</title>
+  ${faviconHref ? `<link rel="icon" href="${faviconHref}">` : ''}
+  <style>${tailwindCSS}</style>
+</head>
+<body>
+  <div id="root">
+    ${inner}
+  </div>
+</body>
+</html>`;
   };
 
   const downloadFile = (filename: string, text: string) => {
@@ -82,16 +217,21 @@ export function TopBar() {
 
   const handlePreview = () => {
     const currentPage = state.pages.find(p => p.id === state.currentPageId);
-    console.log('Preview - Current page:', currentPage);
-    console.log('Preview - Current page HTML:', currentPage?.html);
     
     if (!currentPage || !currentPage.html) {
-      alert('No content to preview. Please add some blocks to your page first.');
+      // Use toast instead of alert
+      import('@/hooks/use-toast').then(({ toast }) => {
+        toast({
+          title: "No content to preview",
+          description: "Please add some blocks to your page first.",
+          variant: "destructive"
+        });
+      });
       return;
     }
     
     const html = buildStandaloneHTML(state.settings.brandName || 'Landing');
-    const w = window.open();
+    const w = window.open('', '_blank', 'width=1200,height=800');
     if (w) {
       w.document.write(html);
       w.document.close();
@@ -100,10 +240,15 @@ export function TopBar() {
   
   const handleExportHTML = () => {
     const currentPage = state.pages.find(p => p.id === state.currentPageId);
-    console.log('Export - Current page:', currentPage);
     
     if (!currentPage || !currentPage.html) {
-      alert('No content to export. Please add some blocks to your page first.');
+      import('@/hooks/use-toast').then(({ toast }) => {
+        toast({
+          title: "No content to export",
+          description: "Please add some blocks to your page first.",
+          variant: "destructive"
+        });
+      });
       return;
     }
     

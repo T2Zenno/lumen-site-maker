@@ -68,13 +68,34 @@ export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
         
         <div className="flex items-center gap-2">
           <div className="flex bg-muted rounded-lg p-1">
-            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md">
+            <button 
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                state.previewMode === 'desktop' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'text-muted-foreground hover:text-card-foreground'
+              }`}
+              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'desktop' })}
+            >
               Desktop
             </button>
-            <button className="px-3 py-1 text-sm text-muted-foreground hover:text-card-foreground">
+            <button 
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                state.previewMode === 'tablet' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'text-muted-foreground hover:text-card-foreground'
+              }`}
+              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'tablet' })}
+            >
               Tablet
             </button>
-            <button className="px-3 py-1 text-sm text-muted-foreground hover:text-card-foreground">
+            <button 
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                state.previewMode === 'mobile' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'text-muted-foreground hover:text-card-foreground'
+              }`}
+              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'mobile' })}
+            >
               Mobile
             </button>
           </div>
@@ -83,20 +104,30 @@ export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
       
       <div
         ref={canvasRef}
-        className={`builder-canvas flex-1 ${isDragOver ? 'drag-over' : ''}`}
+        className={`builder-canvas flex-1 overflow-auto max-h-full ${isDragOver ? 'drag-over' : ''} ${
+          state.previewMode === 'tablet' ? 'max-w-3xl mx-auto' : 
+          state.previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
+        }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleCanvasClick}
+        style={{ 
+          maxHeight: 'calc(100vh - 200px)',
+          transition: 'max-width 0.3s ease'
+        }}
       >
         {currentPage?.html ? (
           <div
-            className="p-6 space-y-4"
+            className="p-6 space-y-4 min-h-full"
+            data-canvas-content
             onClick={handleElementClick}
             dangerouslySetInnerHTML={{ __html: currentPage.html }}
           />
         ) : (
-          <DropZone />
+          <div data-canvas-content>
+            <DropZone />
+          </div>
         )}
       </div>
     </div>
