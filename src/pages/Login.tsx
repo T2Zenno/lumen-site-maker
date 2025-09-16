@@ -1,98 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff } from "lucide-react";
 
+// Extend the Window interface untuk callback reCAPTCHA
 declare global {
   interface Window {
     grecaptcha: any;
+    handleCaptchaVerify: (token: string) => void;
+    handleCaptchaExpired: () => void;
+    handleCaptchaError: () => void;
   }
 }
 
 export function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [captchaCompleted, setCaptchaCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  // Load Google reCAPTCHA script
+  // Ganti dengan site key milikmu
+  const RECAPTCHA_SITE_KEY = "6Lf2SssrAAAAAJiH1GgQp5z_tH2C3AKx1JeZ6Ymo";
+
+  // Load Google reCAPTCHA v2 script
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/api.js';
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js";
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
 
-    // Initialize reCAPTCHA when script loads
-    script.onload = () => {
-      window.grecaptcha.ready(() => {
-        console.log('reCAPTCHA loaded');
-      });
+    // Tambah callbacks ke window
+    window.handleCaptchaVerify = (token: string) => {
+      if (token) {
+        setCaptchaCompleted(true);
+        setError("");
+      }
+    };
+
+    window.handleCaptchaExpired = () => {
+      setCaptchaCompleted(false);
+      setError("Waktu verifikasi captcha habis. Silakan coba lagi.");
+    };
+
+    window.handleCaptchaError = () => {
+      setCaptchaCompleted(false);
+      setError("Terjadi kesalahan dalam verifikasi captcha.");
     };
 
     return () => {
-      // Clean up
       document.head.removeChild(script);
     };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     if (!captchaCompleted) {
-      setError('Harap verifikasi bahwa Anda bukan robot');
+      setError("Harap verifikasi bahwa Anda bukan robot");
       setIsLoading(false);
       return;
     }
 
-    // Verify reCAPTCHA token with server (simulated here)
     try {
-      // In a real app, you would verify the token with your backend
+      // Biasanya token dikirim ke backend di sini:
       // const token = window.grecaptcha.getResponse();
-      // const verified = await verifyCaptcha(token);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // await verifyCaptcha(token);
+
+      // Simulasi loading
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (!login(username, password)) {
-        setError('Username atau password salah');
-        // Reset reCAPTCHA on failed login
+        setError("Username atau password salah");
+        // Reset captcha kalau login gagal
         window.grecaptcha.reset();
         setCaptchaCompleted(false);
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat verifikasi captcha');
+      setError("Terjadi kesalahan saat verifikasi captcha");
       window.grecaptcha.reset();
       setCaptchaCompleted(false);
     }
-    
+
     setIsLoading(false);
-  };
-
-  const handleCaptchaVerify = (token: string) => {
-    if (token) {
-      setCaptchaCompleted(true);
-      setError('');
-    }
-  };
-
-  const handleCaptchaExpired = () => {
-    setCaptchaCompleted(false);
-    setError('Waktu verifikasi captcha habis. Silakan coba lagi.');
-  };
-
-  const handleCaptchaError = () => {
-    setCaptchaCompleted(false);
-    setError('Terjadi kesalahan dalam verifikasi captcha.');
   };
 
   return (
@@ -118,12 +123,13 @@ export function Login() {
                 autoComplete="username"
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Masukkan password"
@@ -146,27 +152,27 @@ export function Login() {
                 </Button>
               </div>
             </div>
-            
-            {/* Google reCAPTCHA v2 */}
+
+            {/* Google reCAPTCHA v2 Checkbox */}
             <div className="flex justify-center">
               <div
                 className="g-recaptcha"
-                data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // This is a test key from Google
+                data-sitekey={RECAPTCHA_SITE_KEY}
                 data-callback="handleCaptchaVerify"
                 data-expired-callback="handleCaptchaExpired"
                 data-error-callback="handleCaptchaError"
               ></div>
             </div>
-            
+
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
+
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading || !captchaCompleted}
             >
               {isLoading ? "Memproses..." : "Masuk"}
@@ -174,54 +180,6 @@ export function Login() {
           </form>
         </CardContent>
       </Card>
-      
-      {/* Add global functions for reCAPTCHA callbacks */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.handleCaptchaVerify = function(token) {
-              window.dispatchEvent(new CustomEvent('captchaVerified', { detail: token }));
-            };
-            window.handleCaptchaExpired = function() {
-              window.dispatchEvent(new Event('captchaExpired'));
-            };
-            window.handleCaptchaError = function() {
-              window.dispatchEvent(new Event('captchaError'));
-            };
-          `,
-        }}
-      />
     </div>
   );
 }
-
-// Hook untuk mendengarkan event reCAPTCHA
-export const useCaptchaEvents = () => {
-  const [verified, setVerified] = useState(false);
-  
-  useEffect(() => {
-    const handleVerified = (e: CustomEvent) => {
-      setVerified(true);
-    };
-    
-    const handleExpired = () => {
-      setVerified(false);
-    };
-    
-    const handleError = () => {
-      setVerified(false);
-    };
-    
-    window.addEventListener('captchaVerified', handleVerified as EventListener);
-    window.addEventListener('captchaExpired', handleExpired);
-    window.addEventListener('captchaError', handleError);
-    
-    return () => {
-      window.removeEventListener('captchaVerified', handleVerified as EventListener);
-      window.removeEventListener('captchaExpired', handleExpired);
-      window.removeEventListener('captchaError', handleError);
-    };
-  }, []);
-  
-  return verified;
-};
