@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,13 +13,9 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
 
-// Extend the Window interface untuk callback reCAPTCHA
 declare global {
   interface Window {
     grecaptcha: any;
-    handleCaptchaVerify: (token: string) => void;
-    handleCaptchaExpired: () => void;
-    handleCaptchaError: () => void;
   }
 }
 
@@ -32,38 +28,46 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  // Ganti dengan site key milikmu
+  const captchaRef = useRef<HTMLDivElement | null>(null);
+
+  // Site key reCAPTCHA kamu
   const RECAPTCHA_SITE_KEY = "6Lf2SssrAAAAAJiH1GgQp5z_tH2C3AKx1JeZ6Ymo";
 
-  // Load Google reCAPTCHA v2 script
+  // Load script Google reCAPTCHA
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js";
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+    const scriptId = "recaptcha-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
 
-    // Tambah callbacks ke window
-    window.handleCaptchaVerify = (token: string) => {
-      if (token) {
-        setCaptchaCompleted(true);
-        setError("");
-      }
-    };
-
-    window.handleCaptchaExpired = () => {
-      setCaptchaCompleted(false);
-      setError("Waktu verifikasi captcha habis. Silakan coba lagi.");
-    };
-
-    window.handleCaptchaError = () => {
-      setCaptchaCompleted(false);
-      setError("Terjadi kesalahan dalam verifikasi captcha.");
-    };
-
-    return () => {
-      document.head.removeChild(script);
-    };
+      script.onload = () => {
+        if (window.grecaptcha && captchaRef.current) {
+          window.grecaptcha.ready(() => {
+            window.grecaptcha.render(captchaRef.current, {
+              sitekey: RECAPTCHA_SITE_KEY,
+              callback: (token: string) => {
+                if (token) {
+                  setCaptchaCompleted(true);
+                  setError("");
+                }
+              },
+              "expired-callback": () => {
+                setCaptchaCompleted(false);
+                setError("Waktu verifikasi captcha habis. Silakan coba lagi.");
+              },
+              "error-callback": () => {
+                setCaptchaCompleted(false);
+                setError("Terjadi kesalahan dalam verifikasi captcha.");
+              },
+            });
+          });
+        }
+      };
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,16 +82,16 @@ export function Login() {
     }
 
     try {
-      // Biasanya token dikirim ke backend di sini:
-      // const token = window.grecaptcha.getResponse();
-      // await verifyCaptcha(token);
+      // Ambil token dari reCAPTCHA
+      const token = window.grecaptcha.getResponse();
 
-      // Simulasi loading
+      // Biasanya token dikirim ke backend untuk verifikasi di server
+      console.log("Token reCAPTCHA:", token);
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (!login(username, password)) {
         setError("Username atau password salah");
-        // Reset captcha kalau login gagal
         window.grecaptcha.reset();
         setCaptchaCompleted(false);
       }
@@ -153,15 +157,9 @@ export function Login() {
               </div>
             </div>
 
-            {/* Google reCAPTCHA v2 Checkbox */}
+            {/* Tempat render reCAPTCHA */}
             <div className="flex justify-center">
-              <div
-                className="g-recaptcha"
-                data-sitekey={RECAPTCHA_SITE_KEY}
-                data-callback="handleCaptchaVerify"
-                data-expired-callback="handleCaptchaExpired"
-                data-error-callback="handleCaptchaError"
-              ></div>
+              <div ref={captchaRef}></div>
             </div>
 
             {error && (
