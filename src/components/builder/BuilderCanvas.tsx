@@ -5,9 +5,12 @@ import { DropZone } from './DropZone';
 
 interface BuilderCanvasProps {
   draggedBlock: string | null;
+  isMobile?: boolean;
+  onElementSelect?: () => void;
+  onDragStart?: () => void;
 }
 
-export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
+export function BuilderCanvas({ draggedBlock, isMobile, onElementSelect, onDragStart }: BuilderCanvasProps) {
   const { state, dispatch } = useAppState();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -17,6 +20,9 @@ export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
+    if (isMobile && onDragStart) {
+      onDragStart();
+    }
   };
   
   const handleDragLeave = (e: React.DragEvent) => {
@@ -52,6 +58,9 @@ export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
     const blockElement = element.closest('[data-block-id]') as HTMLElement;
     if (blockElement) {
       dispatch({ type: 'SELECT_ELEMENT', payload: blockElement });
+      if (isMobile && onElementSelect) {
+        onElementSelect();
+      }
     }
   };
   
@@ -61,59 +70,61 @@ export function BuilderCanvas({ draggedBlock }: BuilderCanvasProps) {
   
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-4 flex items-center gap-4">
-        <h2 className="text-lg font-semibold text-card-foreground">
-          {currentPage?.name || 'Untitled Page'}
-        </h2>
-        
-        <div className="flex items-center gap-2">
-          <div className="flex bg-muted rounded-lg p-1">
-            <button 
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                state.previewMode === 'desktop' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'text-muted-foreground hover:text-card-foreground'
-              }`}
-              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'desktop' })}
-            >
-              Desktop
-            </button>
-            <button 
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                state.previewMode === 'tablet' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'text-muted-foreground hover:text-card-foreground'
-              }`}
-              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'tablet' })}
-            >
-              Tablet
-            </button>
-            <button 
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                state.previewMode === 'mobile' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'text-muted-foreground hover:text-card-foreground'
-              }`}
-              onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'mobile' })}
-            >
-              Mobile
-            </button>
+      {!isMobile && (
+        <div className="mb-4 flex items-center gap-4">
+          <h2 className="text-lg font-semibold text-card-foreground">
+            {currentPage?.name || 'Untitled Page'}
+          </h2>
+          
+          <div className="flex items-center gap-2">
+            <div className="flex bg-muted rounded-lg p-1">
+              <button 
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  state.previewMode === 'desktop' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-card-foreground'
+                }`}
+                onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'desktop' })}
+              >
+                Desktop
+              </button>
+              <button 
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  state.previewMode === 'tablet' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-card-foreground'
+                }`}
+                onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'tablet' })}
+              >
+                Tablet
+              </button>
+              <button 
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  state.previewMode === 'mobile' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-card-foreground'
+                }`}
+                onClick={() => dispatch({ type: 'SET_PREVIEW_MODE', payload: 'mobile' })}
+              >
+                Mobile
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
       
       <div
         ref={canvasRef}
         className={`builder-canvas flex-1 overflow-auto max-h-full ${isDragOver ? 'drag-over' : ''} ${
-          state.previewMode === 'tablet' ? 'max-w-3xl mx-auto' : 
-          state.previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
-        }`}
+          !isMobile && state.previewMode === 'tablet' ? 'max-w-3xl mx-auto' : 
+          !isMobile && state.previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
+        } ${isMobile ? 'p-4' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleCanvasClick}
         style={{ 
-          maxHeight: 'calc(100vh - 200px)',
+          maxHeight: isMobile ? 'calc(100vh - 120px)' : 'calc(100vh - 200px)',
           transition: 'max-width 0.3s ease'
         }}
       >

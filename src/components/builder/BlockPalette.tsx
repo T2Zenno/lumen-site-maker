@@ -95,21 +95,22 @@ const blockCategories = [
 ];
 
 interface BlockPaletteProps {
-  onDragStart: (blockId: string) => void;
+  onDragStart: (blockId?: string) => void;
+  isMobile?: boolean;
 }
 
-export function BlockPalette({ onDragStart }: BlockPaletteProps) {
+export function BlockPalette({ onDragStart, isMobile }: BlockPaletteProps) {
   const handleDragStart = (e: React.DragEvent, blockId: string) => {
     e.dataTransfer.setData('text/blockId', blockId);
     onDragStart(blockId);
   };
   
   const handleDragEnd = () => {
-    onDragStart('');
+    onDragStart();
   };
   
   return (
-    <div className="p-4 space-y-6 overflow-auto h-full">
+    <div className={`p-4 space-y-6 overflow-auto h-full ${isMobile ? 'pb-safe' : ''}`}>
       {blockCategories.map((category) => (
         <div key={category.name}>
           <h4 className="text-sm font-semibold text-muted-foreground mb-3">
