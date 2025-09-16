@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { 
+import {
   Menu,
   Plus,
   Copy,
   Eye,
   Download,
   Rocket,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from 'lucide-react';
 import { useAppState } from '@/contexts/AppStateContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,6 +22,7 @@ import {
 
 export function TopBar() {
   const { state, dispatch } = useAppState();
+  const { logout } = useAuth();
   const [showPublishModal, setShowPublishModal] = useState(false);
   
   const currentPage = state.pages.find(p => p.id === state.currentPageId);
@@ -361,10 +364,20 @@ export function TopBar() {
             <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
             <span className="text-xs text-muted-foreground">Online</span>
           </div>
-          
+
           <div className="bg-muted px-2 py-1 rounded-md text-xs font-medium">
             {state.settings.workspace || 'default'}
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={logout}
+            className="gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
         </div>
       </header>
     </>

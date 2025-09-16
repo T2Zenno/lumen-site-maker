@@ -11,6 +11,7 @@ import { CRMView } from '@/components/views/CRMView';
 import { RecapView } from '@/components/views/RecapView';
 import { AppsView } from '@/components/views/AppsView';
 import { SettingsView } from '@/components/views/SettingsView';
+import { OrientationPrompt } from '@/components/ui/orientation-prompt';
 
 export function MainLayout() {
   const { state } = useAppState();
@@ -48,14 +49,16 @@ export function MainLayout() {
   return (
     <div className="min-h-screen flex w-full bg-background text-foreground">
       <AppSidebar />
-      
+
       <div className="flex-1 flex flex-col min-h-screen">
         <TopBar />
-        
+
         <main className="flex-1 flex overflow-hidden">
           {renderCurrentView()}
         </main>
       </div>
+
+      <OrientationPrompt />
     </div>
   );
 }
