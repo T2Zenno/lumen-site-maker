@@ -2,15 +2,21 @@ import React, { useState, useRef } from 'react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 import { Upload, Trash2, Grid3X3, List, Search, Image as ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export function LibraryView() {
   const { state, dispatch } = useAppState();
+  const { toast } = useToast();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedMedia, setSelectedMedia] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [deleteMediaId, setDeleteMediaId] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,13 +63,34 @@ export function LibraryView() {
   
   const handleDeleteSelected = () => {
     if (selectedMedia.length === 0) return;
-    if (!confirm(`Delete ${selectedMedia.length} selected media files?`)) return;
-    
+    setShowBulkDeleteDialog(true);
+  };
+  
+  const confirmBulkDelete = () => {
     selectedMedia.forEach(mediaId => {
       dispatch({ type: 'DELETE_MEDIA', payload: mediaId });
     });
     
     setSelectedMedia([]);
+    setShowBulkDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: `Deleted ${selectedMedia.length} media files`,
+    });
+  };
+  
+  const handleDeleteMedia = (mediaId: string) => {
+    setDeleteMediaId(mediaId);
+    setShowDeleteDialog(true);
+  };
+  
+  const confirmDeleteMedia = () => {
+    dispatch({ type: 'DELETE_MEDIA', payload: deleteMediaId });
+    setShowDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: "Media file deleted successfully",
+    });
   };
   
   // Filter media based on search query
@@ -286,18 +313,14 @@ export function LibraryView() {
                     </p>
                   </div>
                   
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (confirm('Delete this media file?')) {
-                              dispatch({ type: 'DELETE_MEDIA', payload: media.id });
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteMedia(media.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -319,6 +342,27 @@ export function LibraryView() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Dialogs */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Media File"
+        description="Are you sure you want to delete this media file? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={confirmDeleteMedia}
+      />
+      
+      <ConfirmationDialog
+        open={showBulkDeleteDialog}
+        onOpenChange={setShowBulkDeleteDialog}
+        title="Delete Selected Files"
+        description={`Are you sure you want to delete ${selectedMedia.length} selected media files? This action cannot be undone.`}
+        confirmText="Delete All"
+        variant="destructive"
+        onConfirm={confirmBulkDelete}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -15,7 +17,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export function OrdersView() {
   const { state, dispatch } = useAppState();
+  const { toast } = useToast();
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   
   const handleAddOrder = () => {
     if (state.products.length === 0) {
@@ -70,6 +74,21 @@ export function OrdersView() {
     });
     
     setSelectedOrders([]);
+  };
+  
+  const confirmBulkDelete = () => {
+    // Delete in reverse order to maintain indices
+    const sorted = [...selectedOrders].sort((a, b) => b - a);
+    sorted.forEach(index => {
+      dispatch({ type: 'DELETE_ORDER', payload: index });
+    });
+    
+    setSelectedOrders([]);
+    setShowBulkDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: `Deleted ${sorted.length} orders successfully`,
+    });
   };
   
   const handleSelectOrder = (index: number, checked: boolean) => {
@@ -193,18 +212,15 @@ export function OrdersView() {
                 <CheckCircle2 className="w-4 h-4" />
                 Mark as Paid
               </Button>
-              <Button variant="destructive" size="sm" className="gap-2" onClick={() => {
-                if (selectedOrders.length === 0) return;
-                if (!confirm(`Delete ${selectedOrders.length} selected orders?`)) return;
-                
-                // Delete in reverse order to maintain indices
-                const sorted = [...selectedOrders].sort((a, b) => b - a);
-                sorted.forEach(index => {
-                  dispatch({ type: 'DELETE_ORDER', payload: index });
-                });
-                
-                setSelectedOrders([]);
-              }}>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="gap-2" 
+                onClick={() => {
+                  if (selectedOrders.length === 0) return;
+                  setShowBulkDeleteDialog(true);
+                }}
+              >
                 <Trash2 className="w-4 h-4" />
                 Delete Selected
               </Button>
@@ -340,6 +356,17 @@ export function OrdersView() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Dialog */}
+      <ConfirmationDialog
+        open={showBulkDeleteDialog}
+        onOpenChange={setShowBulkDeleteDialog}
+        title="Delete Selected Orders"
+        description={`Are you sure you want to delete ${selectedOrders.length} selected orders? This action cannot be undone.`}
+        confirmText="Delete All"
+        variant="destructive"
+        onConfirm={confirmBulkDelete}
+      />
     </div>
   );
 }

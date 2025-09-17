@@ -449,7 +449,7 @@ export function SettingsView() {
                     <SelectValue placeholder="Select logo from library" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-popover border border-border shadow-lg">
-                    <SelectItem value="">No logo</SelectItem>
+                    <SelectItem value="none">No logo</SelectItem>
                     {state.media.map((media) => (
                       <SelectItem key={media.id} value={media.id}>
                         {media.name}
@@ -466,7 +466,7 @@ export function SettingsView() {
                     <SelectValue placeholder="Select favicon from library" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-popover border border-border shadow-lg">
-                    <SelectItem value="">No favicon</SelectItem>
+                    <SelectItem value="none">No favicon</SelectItem>
                     {state.media.map((media) => (
                       <SelectItem key={media.id} value={media.id}>
                         {media.name}

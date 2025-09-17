@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -15,25 +17,25 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export function CustomersView() {
   const { state, dispatch } = useAppState();
+  const { toast } = useToast();
   const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   
   const handleAddCustomer = () => {
-    const name = prompt('Customer name?', 'New Customer');
-    if (!name) return;
-    
-    const phone = prompt('Phone number?', '');
-    const email = prompt('Email address?', '');
-    const note = prompt('Notes?', '');
-    
+    // For now, just add a placeholder. In a real app, this would open a proper form dialog
     const newCustomer = {
       id: 'customer_' + Date.now(),
-      name,
-      phone: phone || '',
-      email: email || '',
-      note: note || ''
+      name: 'New Customer',
+      phone: '',
+      email: '',
+      note: ''
     };
     
     dispatch({ type: 'ADD_CUSTOMER', payload: newCustomer });
+    toast({
+      title: "Success",
+      description: "Customer added successfully. Click Edit to update details.",
+    });
   };
   
   const handleSelectCustomer = (index: number, checked: boolean) => {
@@ -54,8 +56,10 @@ export function CustomersView() {
   
   const handleBulkDelete = () => {
     if (selectedCustomers.length === 0) return;
-    if (!confirm(`Delete ${selectedCustomers.length} selected customers?`)) return;
-    
+    setShowBulkDeleteDialog(true);
+  };
+  
+  const confirmBulkDelete = () => {
     // Delete in reverse order to maintain indices
     const sorted = [...selectedCustomers].sort((a, b) => b - a);
     sorted.forEach(index => {
@@ -64,6 +68,11 @@ export function CustomersView() {
     });
     
     setSelectedCustomers([]);
+    setShowBulkDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: `Deleted ${sorted.length} customers successfully`,
+    });
   };
   
   // Calculate customer statistics
@@ -287,6 +296,17 @@ export function CustomersView() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Dialog */}
+      <ConfirmationDialog
+        open={showBulkDeleteDialog}
+        onOpenChange={setShowBulkDeleteDialog}
+        title="Delete Selected Customers"
+        description={`Are you sure you want to delete ${selectedCustomers.length} selected customers? This action cannot be undone.`}
+        confirmText="Delete All"
+        variant="destructive"
+        onConfirm={confirmBulkDelete}
+      />
     </div>
   );
 }

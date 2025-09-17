@@ -3,6 +3,9 @@ import { useAppState } from '@/contexts/AppStateContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmationDialog, InputDialog } from '@/components/ui/confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -16,47 +19,104 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export function ProductsView() {
   const { state, dispatch } = useAppState();
+  const { toast } = useToast();
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   
+  // Dialog states
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [editIndex, setEditIndex] = useState(-1);
+  const [deleteIndex, setDeleteIndex] = useState(-1);
+  
+  // Form states
+  const [productForm, setProductForm] = useState({
+    name: '',
+    price: '',
+    sku: '',
+    category: '',
+    stock: ''
+  });
+  
   const handleAddProduct = () => {
-    const name = prompt('Product name?', 'New Product');
-    if (!name) return;
-    
-    const price = parseInt(prompt('Price?', '100000') || '0', 10);
-    const sku = prompt('SKU?', 'SKU-' + Date.now());
-    const category = prompt('Category?', 'General');
+    setProductForm({
+      name: '',
+      price: '',
+      sku: '',
+      category: '',
+      stock: ''
+    });
+    setShowAddDialog(true);
+  };
+  
+  const confirmAddProduct = () => {
+    if (!productForm.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Product name is required",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const newProduct = {
       id: 'product_' + Date.now(),
-      name,
-      price,
-      sku: sku || '',
-      category: category || '',
+      name: productForm.name,
+      price: parseInt(productForm.price) || 0,
+      sku: productForm.sku || 'SKU-' + Date.now(),
+      category: productForm.category || 'General',
       image: '',
-      stock: 100
+      stock: parseInt(productForm.stock) || 100
     };
     
     dispatch({ type: 'ADD_PRODUCT', payload: newProduct });
+    setShowAddDialog(false);
+    toast({
+      title: "Success",
+      description: "Product added successfully",
+    });
   };
   
   const handleEditProduct = (index: number) => {
     const product = state.products[index];
-    const name = prompt('Product name?', product.name) || product.name;
-    const price = parseInt(prompt('Price?', product.price.toString()) || product.price.toString(), 10);
-    const sku = prompt('SKU?', product.sku) || product.sku;
-    const category = prompt('Category?', product.category) || product.category;
-    const stock = parseInt(prompt('Stock?', product.stock.toString()) || product.stock.toString(), 10);
+    setProductForm({
+      name: product.name,
+      price: product.price.toString(),
+      sku: product.sku,
+      category: product.category,
+      stock: product.stock.toString()
+    });
+    setEditIndex(index);
+    setShowEditDialog(true);
+  };
+  
+  const confirmEditProduct = () => {
+    if (!productForm.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Product name is required",
+        variant: "destructive"
+      });
+      return;
+    }
     
+    const product = state.products[editIndex];
     const updatedProduct = {
       ...product,
-      name,
-      price,
-      sku,
-      category,
-      stock
+      name: productForm.name,
+      price: parseInt(productForm.price) || 0,
+      sku: productForm.sku,
+      category: productForm.category,
+      stock: parseInt(productForm.stock) || 0
     };
     
-    dispatch({ type: 'UPDATE_PRODUCT', payload: { index, product: updatedProduct } });
+    dispatch({ type: 'UPDATE_PRODUCT', payload: { index: editIndex, product: updatedProduct } });
+    setShowEditDialog(false);
+    toast({
+      title: "Success",
+      description: "Product updated successfully",
+    });
   };
   
   const handleImageUpload = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,9 +136,17 @@ export function ProductsView() {
   };
   
   const handleDeleteProduct = (index: number) => {
-    if (confirm('Delete this product?')) {
-      dispatch({ type: 'DELETE_PRODUCT', payload: index });
-    }
+    setDeleteIndex(index);
+    setShowDeleteDialog(true);
+  };
+  
+  const confirmDeleteProduct = () => {
+    dispatch({ type: 'DELETE_PRODUCT', payload: deleteIndex });
+    setShowDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: "Product deleted successfully",
+    });
   };
   
   const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +159,11 @@ export function ProductsView() {
       const lines = text.split('\n').filter(line => line.trim());
       
       if (lines.length < 2) {
-        alert('CSV file must have at least a header and one data row.');
+        toast({
+          title: "Import Error",
+          description: "CSV file must have at least a header and one data row.",
+          variant: "destructive"
+        });
         return;
       }
       
@@ -118,7 +190,10 @@ export function ProductsView() {
         }
       });
       
-      alert(`Imported ${dataLines.length} products successfully!`);
+      toast({
+        title: "Import Success",
+        description: `Imported ${dataLines.length} products successfully!`,
+      });
     };
     
     reader.readAsText(file);
@@ -129,8 +204,10 @@ export function ProductsView() {
   
   const handleBulkDelete = () => {
     if (selectedProducts.length === 0) return;
-    if (!confirm(`Delete ${selectedProducts.length} selected products?`)) return;
-    
+    setShowBulkDeleteDialog(true);
+  };
+  
+  const confirmBulkDelete = () => {
     // Delete in reverse order to maintain indices
     const sorted = [...selectedProducts].sort((a, b) => b - a);
     sorted.forEach(index => {
@@ -138,6 +215,11 @@ export function ProductsView() {
     });
     
     setSelectedProducts([]);
+    setShowBulkDeleteDialog(false);
+    toast({
+      title: "Success",
+      description: `Deleted ${sorted.length} products successfully`,
+    });
   };
   
   const handleSelectProduct = (index: number, checked: boolean) => {
@@ -380,6 +462,103 @@ export function ProductsView() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Dialogs */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={confirmDeleteProduct}
+      />
+      
+      <ConfirmationDialog
+        open={showBulkDeleteDialog}
+        onOpenChange={setShowBulkDeleteDialog}
+        title="Delete Selected Products"
+        description={`Are you sure you want to delete ${selectedProducts.length} selected products? This action cannot be undone.`}
+        confirmText="Delete All"
+        variant="destructive"
+        onConfirm={confirmBulkDelete}
+      />
+      
+      {/* Product Form Dialog */}
+      {(showAddDialog || showEditDialog) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background border border-border rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">
+              {showAddDialog ? 'Add New Product' : 'Edit Product'}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Product Name</Label>
+                <Input
+                  placeholder="Product name"
+                  value={productForm.name}
+                  onChange={(e) => setProductForm({...productForm, name: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Price</Label>
+                <Input
+                  placeholder="Price"
+                  type="number"
+                  value={productForm.price}
+                  onChange={(e) => setProductForm({...productForm, price: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">SKU</Label>
+                <Input
+                  placeholder="SKU"
+                  value={productForm.sku}
+                  onChange={(e) => setProductForm({...productForm, sku: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Category</Label>
+                <Input
+                  placeholder="Category"
+                  value={productForm.category}
+                  onChange={(e) => setProductForm({...productForm, category: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Stock</Label>
+                <Input
+                  placeholder="Stock"
+                  type="number"
+                  value={productForm.stock}
+                  onChange={(e) => setProductForm({...productForm, stock: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setShowEditDialog(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={showAddDialog ? confirmAddProduct : confirmEditProduct}
+              >
+                {showAddDialog ? 'Add Product' : 'Update Product'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
