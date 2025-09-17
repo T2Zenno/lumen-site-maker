@@ -40,26 +40,8 @@ export function FunctionalInspector() {
       setPadding(computedStyle.padding.replace('px', ''));
       setMargin(computedStyle.margin.replace('px', ''));
       setTextAlign(computedStyle.textAlign);
-
-      // Get current image
-      let currentImageSrc = '';
-      if (element.tagName === 'IMG') {
-        currentImageSrc = element.getAttribute('src') || '';
-      } else if (computedStyle.backgroundImage && computedStyle.backgroundImage !== 'none') {
-        const match = computedStyle.backgroundImage.match(/url\(["']?(.*?)["']?\)/);
-        currentImageSrc = match ? match[1] : '';
-      }
-      
-      // Find matching media item
-      const matchingMedia = state.media.find(media => media.dataUrl === currentImageSrc);
-      setSelectedImage(matchingMedia?.id || '');
-    } else {
-      // Reset form when no element is selected
-      setElementText('');
-      setElementLink('');
-      setSelectedImage('');
     }
-  }, [state.selectedElement, state.media]);
+  }, [state.selectedElement]);
   
   // Helper function to convert RGB to HEX
   const rgbToHex = (rgb: string): string => {
@@ -212,28 +194,6 @@ export function FunctionalInspector() {
       });
       
       updatePageHTML();
-    }
-  };
-
-  // Handle image selection
-  const handleImageSelection = (mediaId: string) => {
-    setSelectedImage(mediaId);
-    if (state.selectedElement && mediaId) {
-      const selectedMedia = state.media.find(media => media.id === mediaId);
-      if (selectedMedia) {
-        // Check if element is an image tag
-        if (state.selectedElement.tagName === 'IMG') {
-          state.selectedElement.setAttribute('src', selectedMedia.dataUrl);
-          state.selectedElement.setAttribute('alt', selectedMedia.name);
-        } else {
-          // For other elements, set as background image
-          state.selectedElement.style.backgroundImage = `url(${selectedMedia.dataUrl})`;
-          state.selectedElement.style.backgroundSize = 'cover';
-          state.selectedElement.style.backgroundPosition = 'center';
-          state.selectedElement.style.backgroundRepeat = 'no-repeat';
-        }
-        updatePageHTML();
-      }
     }
   };
   
@@ -463,31 +423,18 @@ export function FunctionalInspector() {
               <CardTitle className="text-sm">Images</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <Select value={selectedImage} onValueChange={handleImageSelection}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select image..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">No image</SelectItem>
-                    {state.media.map((media) => (
-                      <SelectItem key={media.id} value={media.id}>
-                        {media.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedImage && (
-                  <div className="mt-2">
-                    <div className="text-xs text-muted-foreground mb-1">Preview:</div>
-                    <img 
-                      src={state.media.find(m => m.id === selectedImage)?.dataUrl} 
-                      alt="Preview" 
-                      className="w-full h-20 object-cover rounded border"
-                    />
-                  </div>
-                )}
-              </div>
+              <Select value={selectedImage} onValueChange={setSelectedImage}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select image..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {state.media.map((media) => (
+                    <SelectItem key={media.id} value={media.id}>
+                      {media.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
         </TabsContent>
